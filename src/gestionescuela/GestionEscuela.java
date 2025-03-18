@@ -44,10 +44,12 @@ public class GestionEscuela {
                                     + "\n\t4- Registrar un profesor"
                                     + "\n\t5- Asignar un profesor a una asignatura"
                                     + "\n\t6- Registrar un alumno"
-                                    + "\n\t7- Salir"
+                                    + "\n\t7- Mostrar toda la información de la escuela"
+                                    + "\n\t8- Calcular la recaudación de un curso"
+                                    + "\n\t9- Salir"
                              + "\nTu respuesta: ");
             //Debemos comprobar que la opción elegida esté recogida entre las que hemos definido, y volver a pedirla si no es el caso
-            respuesta = seleccionarOpcionInt(1, 7);
+            respuesta = seleccionarOpcionInt(1, 9);
             
             //Dependiendo de la respuesta que hayamos recogido, ejecutamos una parte del programa u otra
             switch(respuesta){
@@ -65,6 +67,9 @@ public class GestionEscuela {
 
                         System.out.print("Precio del curso: ");
                         double pCurso = scan.nextDouble();
+                        
+                        //Limpiamos el buffer
+                        scan.nextLine();
                         
                         //Creamos el curso con los datos recogidos
                         cursos[Curso.getNumCursos()] = new Curso(nCurso, aCurso, pCurso);
@@ -89,7 +94,7 @@ public class GestionEscuela {
                     }
                 break;
                 
-                case 3: //Asignar una asignatura a un curso
+                case 3: //Asignar una asignatura a un curso SIN FALLOS POR AHORA
                     //Si todavía no hemos definido ningún curso/asignatura, no podemos hacer la asignación
                     if(Curso.getNumCursos() == 0) System.out.println("No hay ningún curso registrado.");
                     else if(Asignatura.getNumAsig() == 0) System.out.println("No hay ninguna asignatura registrada.");
@@ -102,7 +107,7 @@ public class GestionEscuela {
                         System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                         do{
                             respuesta2 = seleccionarOpcionInt(1, longitud);
-                        } while (respuesta2 != longitud && cursos[--respuesta2].estaLlenoAsig());
+                        } while (respuesta2 != longitud && cursos[respuesta2-1].estaLlenoAsig());
                         
                         //Sólo continuamos con el proceso si no hemos elegido la opción "Salir"
                         if(respuesta2 != longitud){
@@ -113,12 +118,11 @@ public class GestionEscuela {
                             System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                             do{
                                 respuesta = seleccionarOpcionInt(1, longitud);
-                            } while (respuesta != longitud && cursos[respuesta2].asignaturaIncluida(asignaturas[--respuesta]));
+                            } while (cursos[respuesta2-1].asignaturaIncluida(asignaturas[respuesta-1]) && respuesta != longitud);
                             
-                            //Sólo continuamos con el proceso si no hemos elegido la opción "Salir"
+                            //Sólo continuamos con el proceso si no hemos elegido la opción "Salir" y si 
                             if(respuesta != longitud){
-                                //Una vez nos hemos asegurado de que los datos son válidos, pasamos a asignar la asignatura al curso
-                                profesores[respuesta2].sumarHoras(asignaturas[respuesta].getHoras());
+                                cursos[respuesta2-1].insertaAsignatura(asignaturas[respuesta-1]);
                             }
                         }
                     }
@@ -176,24 +180,24 @@ public class GestionEscuela {
                         longitud = Profesor.getNumProf()+1;
                         System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                         do{
-                            respuesta2 = seleccionarOpcionInt(1, Profesor.getNumProf()+1);
-                        } while (respuesta2 != longitud && profesores[--respuesta2].estaSobreexplotado());
+                            respuesta2 = seleccionarOpcionInt(1, longitud);
+                        } while (profesores[--respuesta2].estaSobreexplotado() && respuesta2+1 != longitud);
                         
                         //Sólo continuamos con el proceso si no hemos elegido la opción "Salir"
-                        if(respuesta2 != longitud){
+                        if(respuesta2+1 != longitud){
                             //Mostramos la información de las asignaturas, pedimos que se seleccione una y comprobamos que la elección es válida
-                            System.out.println("Elige la asignatura que quieres asignarle a " + profesores[--respuesta2].getDni() + ": ");
+                            System.out.println("Elige la asignatura que quieres asignarle a " + profesores[respuesta2].getNombre() + ": ");
                             imprimirLista(asignaturas);
                             longitud = Asignatura.getNumAsig()+1;
                             System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                             do{
                                 respuesta = seleccionarOpcionInt(1, longitud);
-                            } while (respuesta != longitud && profesores[respuesta2].sePasaria(asignaturas[--respuesta]));
+                            } while (profesores[respuesta2].sePasaria(asignaturas[--respuesta]) && respuesta+1 != longitud);
                             
                             //Sólo continuamos con el proceso si no hemos elegido la opción "Salir"
-                            if(respuesta != longitud){
-                                //Una vez nos hemos asegurado de que los datos son válidos, pasamos a asignar la asignatura al curso
-                                cursos[respuesta2].insertaAsignatura(asignaturas[respuesta]);
+                            if(respuesta+1 != longitud){
+                                //Una vez nos hemos asegurado de que los datos son válidos, pasamos a asignar el profesor a la asignatura
+                                asignaturas[respuesta].setProfesor(profesores[respuesta2]);
                             }
                         }
                                 
@@ -290,7 +294,28 @@ public class GestionEscuela {
                         //profesores[Profesor.getNumProf()] = new Profesor(dniProfesor, nProfesor, sProfesor);
                     }
                 break;
-                case 7: //Salir
+                case 7: //Mostrar toda la información de la escuela
+                    System.out.println("CURSOS:");
+                    for(int i=0; i<Curso.getNumCursos(); i++){
+                        System.out.println("\t" + (i+1) + "- " + cursos[i]);
+                        if(cursos[i].getNumAsignaturas() != 0){
+                            System.out.print("\tASIGNATURAS:\n");
+                            imprimirLista(cursos[i].getAsignaturas());
+                        }
+                        if(cursos[i].getNumAlumnos() != 0){
+                            System.out.print("\tALUMNOS:");
+                            imprimirLista(cursos[i].getAlumnos());
+                        }
+                    }
+                    System.out.println("ASIGNATURAS:");
+                    for(int i=0; i<Asignatura.getNumAsig(); i++){
+                        System.out.println("\t" + (i+1) + "- " + asignaturas[i]);
+                    }
+                break;
+                case 8: //Salir
+                    respuesta = -1;
+                break;
+                case 9: //Salir
                     respuesta = -1;
                 break;
             }

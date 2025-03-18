@@ -9,7 +9,7 @@ public class Asignatura {
     private int codigo;
     private String nombre;
     private static int numAsignaturas = 0;
-    private int numCursos = 0;
+    private int numCursos;
     
     //Constructores:
     public Asignatura(String n, int h){
@@ -17,6 +17,7 @@ public class Asignatura {
         nombre = n;
         numAsignaturas++;
         codigo = numAsignaturas;
+        numCursos = 0;
     }
     
     //Métodos:
@@ -32,14 +33,9 @@ public class Asignatura {
         return docente;
     }
     
-    public boolean setProfesor(Profesor p){
-        boolean realizada;
-        if(p.getNumHoras() + horas <= 20){
-            docente = p;
-            p.sumarHoras(horas);
-            realizada = true;
-        } else realizada = false;
-        return realizada;
+    public void setProfesor(Profesor p){
+        docente = p;
+        if(p != null) p.sumarHoras(horas*numCursos);
     }
     
     public int getCodigo(){
@@ -75,7 +71,7 @@ public class Asignatura {
     @Override
     public String toString(){
         String res = nombre + ", " + horas + " h/semana, (ID = " + codigo + ")";
-        if(docente != null) res += " impartida por " + docente.getNombre();
+        if(docente != null) res += " impartida por " + docente;
         
         return res;
     }

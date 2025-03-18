@@ -86,19 +86,23 @@ public class Curso {
     }
     
     public void insertaAsignatura(Asignatura a){
-        if(a.getProfesor() == null){
-            if((a.getNumEntradas() + 1) * a.getHoras() > 20) System.out.println("Asignar esta asignatura haría que se excediese el límite de horas semanales del profesor.");
+        if(a.getProfesor() != null){
+            if(a.getProfesor().sePasaria(a)) a.setProfesor(null);
             else{
-                a.nuevaEntrada();
-                asignaturas[numAsignaturas++] = a;
-            }
-        } else if(a.getProfesor().getNumHoras() + a.getHoras() > 20) System.out.println("El profesor asignado a la asignatura no puede impartirla más veces sin exceder su máximo de horas semanal.");
-            else{
-                a.nuevaEntrada();
                 a.getProfesor().sumarHoras(a.getHoras());
                 asignaturas[numAsignaturas++] = a;
                 System.out.println("La asignación de la asignatura se ha llevado a cabo con éxito.");
+            }            
+        }
+        
+        if(a.getProfesor() == null){
+            if((a.getNumEntradas() + 1) * a.getHoras() > 20) System.out.println("Asignar esta asignatura haría que se excediese el límite de horas semanales del profesor que la fuese a impartir.");
+            else{
+                a.nuevaEntrada();
+                asignaturas[numAsignaturas++] = a;
+                System.out.println("La asignación de la asignatura se ha llevado a cabo con éxito.");
             }
+        } else if(a.getProfesor().getNumHoras() + a.getHoras()*a.getNumEntradas() > 20) System.out.println("El profesor asignado a la asignatura no puede impartirla más veces sin exceder su máximo de horas semanal.");
     }
     
     public void insertaAlumno(Alumno a){

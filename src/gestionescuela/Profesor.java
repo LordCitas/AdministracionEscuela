@@ -6,7 +6,7 @@ public class Profesor {
     //Atributos de clase: 
     private String dni;
     private String nombre;
-    private int numHoras = 0;
+    private int numHoras;
     private float sueldoHora;
     private static int numProfesores = 0;
     
@@ -16,6 +16,7 @@ public class Profesor {
         nombre = n;
         sueldoHora = s;
         numProfesores++;
+        numHoras = 0;
     }
     
     //Métodos:
@@ -62,13 +63,13 @@ public class Profesor {
     }
     
     public boolean sePasaria(Asignatura a){
-        boolean pasado = (numHoras + a.getHoras() > 20)? true : false;
-        if(pasado) System.out.println(nombre + " ya no puede impartir " + a.getNombre() + " porque superaría su máximo de horas semanales.");
+        boolean pasado = (numHoras + a.getHoras()*((a.getNumEntradas()==0)? 1 : a.getNumEntradas()) > 20)? true : false;
+        if(pasado) System.out.println(nombre + " no podría impartir " + a.getNombre() + " porque superaría su máximo de horas semanales.");
         return pasado;
     }
     
     @Override
     public String toString(){
-        return nombre + ", DNI-" + dni + ", " + sueldoHora + "€/h";
+        return nombre + ", DNI: " + dni + ", " + sueldoHora + "€/h, " + numHoras + " horas ya asignadas";
     }
 }
