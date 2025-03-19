@@ -12,10 +12,10 @@ public class Curso {
     private int numAsignaturas = 0;
     private int id;
     private static int numCursos = 0;
-    private double precio;
+    private int precio;
     
     //Constructores:
-    public Curso(String n, int a, double p){
+    public Curso(String n, int a, int p){
         nombre = n;
         anio = a;
         alumnos = new Alumno[30];
@@ -77,11 +77,11 @@ public class Curso {
         return id;
     }
     
-    public double getPrecio(){
+    public int getPrecio(){
         return precio;
     }
     
-    public void setPrecio(double p){
+    public void setPrecio(int p){
         precio = p;
     }
     
@@ -106,10 +106,10 @@ public class Curso {
     }
     
     public void insertaAlumno(Alumno a){
-        if(numAlumnos == 30) System.out.println("Este curso ya está completo.");
-        else{
+        //if(numAlumnos == 30) System.out.println("Este curso ya está completo.");
+        //else{
             alumnos[numAlumnos++] = a;
-        }
+        //}
     }
     
     public static int getNumCursos(){
@@ -122,7 +122,7 @@ public class Curso {
     
     @Override
     public String toString(){
-        return anio + "º de " + nombre + " (ID = " + id + ")";
+        return anio + "º de " + nombre + ", ID = " + id + ", " + (30-numAlumnos) + " plazas vacantes, a " + precio + "€ cada una";
     }
            
     public boolean asignaturaIncluida(Asignatura a){
@@ -141,7 +141,7 @@ public class Curso {
     
     public boolean estaLlenoAlum(){
         boolean lleno = (numAlumnos >= 30)? true : false;
-        if(lleno) System.out.println("Este curso ya no admite más alumnos.");
+        if(lleno) System.out.print("Este curso ya no admite más alumnos. Por favor, elige otro: ");
         return lleno;
     }
 }

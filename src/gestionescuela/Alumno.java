@@ -27,4 +27,12 @@ public class Alumno {
     public boolean getPlazos(){
         return plazos;
     }  
+
+    @Override
+    public String toString(){
+        String respuesta = nombre + ", DNI: " + dni + ", pago ";
+        if(plazos) respuesta += "por plazos";
+        else respuesta += "completo";
+        return respuesta;
+    }
 }

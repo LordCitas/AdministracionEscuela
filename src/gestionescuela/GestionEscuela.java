@@ -17,6 +17,10 @@ public class GestionEscuela {
                               "Aguado", "Hermoso", "Flores", "Zurita", "Gallego",
                               "Portero", "Montoya", "Aguilera", "Pelta", "Pérez",
                               "Ayuso", "Rajoy", "Zapatero", "Sánchez"};
+
+        //Otro string para mostrar los meses del año
+        String[] meses = {"Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero",
+                          "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"};
         
         //Pedimos el número de aulas (cursos) con los que vamos a trabajar (como máximo)
         System.out.print("Introduce el número de aulas con las que cuenta la escuela: ");
@@ -45,7 +49,7 @@ public class GestionEscuela {
                                     + "\n\t5- Asignar un profesor a una asignatura"
                                     + "\n\t6- Registrar un alumno"
                                     + "\n\t7- Mostrar toda la información de la escuela"
-                                    + "\n\t8- Calcular la recaudación de un curso"
+                                    + "\n\t8- Calcular el márgen de ganancia bruto de la escuela"
                                     + "\n\t9- Salir"
                              + "\nTu respuesta: ");
             //Debemos comprobar que la opción elegida esté recogida entre las que hemos definido, y volver a pedirla si no es el caso
@@ -66,7 +70,7 @@ public class GestionEscuela {
                         int aCurso = scan.nextInt();
 
                         System.out.print("Precio del curso: ");
-                        double pCurso = scan.nextDouble();
+                        int pCurso = scan.nextInt();
                         
                         //Limpiamos el buffer
                         scan.nextLine();
@@ -102,7 +106,7 @@ public class GestionEscuela {
                         
                         //Mostramos la información de los cursos, pedimos que se seleccione uno y comprobamos que la elección es válida
                         System.out.println("Elige el curso al que quieres asignarle una asignatura: ");
-                        imprimirLista(cursos);
+                        imprimirLista(cursos, 1);
                         longitud = Curso.getNumCursos()+1;
                         System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                         do{
@@ -113,7 +117,7 @@ public class GestionEscuela {
                         if(respuesta2 != longitud){
                             //Mostramos la información de las asignaturas, pedimos que se seleccione una y comprobamos que la elección es válida
                             System.out.println("Elige la asignatura que quieres asignarle a este curso: ");
-                            imprimirLista(asignaturas);
+                            imprimirLista(asignaturas, 1);
                             longitud = Asignatura.getNumAsig()+1;
                             System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                             do{
@@ -159,10 +163,10 @@ public class GestionEscuela {
                             //Generamos un DNI aleatorio
                             dniProfesor = generaDNI();
                             
-                            //Generamos un sueldo aleatorio y nos aseguramos de que sea mayor que 10
-                            do{
-                                sProfesor = (float)(Math.random()*10);
-                            } while (sProfesor < 10);
+                            //Generamos un sueldo aleatorio asegurándonos de que sea mayor que 10 (le pongo de máximo 40€ por poner algo)
+                            sProfesor = (float)((10 + Math.random()*30));
+                            //Truncamos pa que quede bonito
+                            sProfesor -= sProfesor%0.01;
                         }
                         
                         //Construimos el profesor y lo introducimos en el array
@@ -176,28 +180,28 @@ public class GestionEscuela {
                     else if(Asignatura.getNumAsig() == 0) System.out.println("No hay ninguna asignatura registrada.");
                     else{ //Si ya tenemos por lo menos uno de cada registrado, continuamos con el proceso
                         System.out.println("Elige al profesor que quieres asignar a una asignatura:");
-                        imprimirLista(profesores);
+                        imprimirLista(profesores, 1);
                         longitud = Profesor.getNumProf()+1;
                         System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                         do{
                             respuesta2 = seleccionarOpcionInt(1, longitud);
-                        } while (profesores[--respuesta2].estaSobreexplotado() && respuesta2+1 != longitud);
+                        } while (respuesta2 != longitud && profesores[respuesta2-1].estaSobreexplotado());
                         
                         //Sólo continuamos con el proceso si no hemos elegido la opción "Salir"
-                        if(respuesta2+1 != longitud){
+                        if(respuesta2 != longitud){
                             //Mostramos la información de las asignaturas, pedimos que se seleccione una y comprobamos que la elección es válida
-                            System.out.println("Elige la asignatura que quieres asignarle a " + profesores[respuesta2].getNombre() + ": ");
-                            imprimirLista(asignaturas);
+                            System.out.println("Elige la asignatura que quieres asignarle a " + profesores[respuesta2-1].getNombre() + ": ");
+                            imprimirLista(asignaturas, 1);
                             longitud = Asignatura.getNumAsig()+1;
                             System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
                             do{
                                 respuesta = seleccionarOpcionInt(1, longitud);
-                            } while (profesores[respuesta2].sePasaria(asignaturas[--respuesta]) && respuesta+1 != longitud);
+                            } while (respuesta != longitud && profesores[respuesta2-1].sePasaria(asignaturas[--respuesta]));
                             
                             //Sólo continuamos con el proceso si no hemos elegido la opción "Salir"
-                            if(respuesta+1 != longitud){
+                            if(respuesta != longitud){
                                 //Una vez nos hemos asegurado de que los datos son válidos, pasamos a asignar el profesor a la asignatura
-                                asignaturas[respuesta].setProfesor(profesores[respuesta2]);
+                                asignaturas[respuesta].setProfesor(profesores[respuesta2-1]);
                             }
                         }
                                 
@@ -205,116 +209,128 @@ public class GestionEscuela {
                 break;
                 case 6: //Registrar un alumno
                     //Si no hemos registrado ningún curso, no vamos a permitir introducir alumnos
-                    if(Curso.getNumCursos() == 0) System.out.println("No hay ningún curso registrado.");
-                    else if(Curso.getNumCursos() == numCursos){
-                        boolean espacio = false;
-                        for(int i=0; i<numCursos && !espacio; i++){
-                            if(cursos[i].getNumAlumnos() != 30) espacio = true;
-                        }
-                        /////
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-                        /// 
-
-
-
-
-
-
-                        if(!espacio) System.out.println("No quedan plazas en ningún curso de la escuela.");
-                        else{
-                            //Mostramos la información de los cursos, pedimos que se seleccione uno y comprobamos que la elección es válida
-                            System.out.println("Elige el curso al que se va a matricular el alumno: ");
-                            imprimirLista(cursos);
-                            longitud = Curso.getNumCursos()+1;
-                            System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
-                            do{
-                                respuesta2 = seleccionarOpcionInt(1, longitud);
-                            } while (respuesta2 != longitud && cursos[--respuesta2].estaLlenoAsig());
-                        }
-                    }
+                    if(Curso.getNumCursos() == 0) System.out.println("No hay ningún curso registrado, crea uno para registrar un alumno.");
                     else{
-                        System.out.print("¿Quieres introducir los datos del alumno manualmente?\n\t1- Sí\n\t2- No\nTu respuesta: ");
-                        respuesta = seleccionarOpcionInt(1, 2);
-                        
-                        //Defino variables que voy a usar en ambos casos
-                        String nAlumno, dniAlumno;
-                        boolean plazos;
-                        
-                        if(respuesta == 1){
-                            //Pedimos el nombre del alumno
-                            System.out.print("Nombre y apellidos del alumno: ");
-                            nAlumno = scan.nextLine();
+                        //Mostramos la información de los cursos, pedimos que se seleccione uno y comprobamos que la elección es válida
+                        System.out.println("Elige el curso al que se va a matricular el alumno: ");
+                        imprimirLista(cursos, 1);
+                        longitud = Curso.getNumCursos()+1;
+                        System.out.print("\t" + longitud + "- Salir\nTu respuesta: ");
+                        do{
+                            respuesta2 = seleccionarOpcionInt(1, longitud);
+                        } while (respuesta2 != longitud && cursos[respuesta2-1].estaLlenoAlum());
 
-                            //Pedimos el dni del alumno
-                            System.out.print("DNI de " + nAlumno + ": ");
-                            dniAlumno = scan.nextLine();
-                            
-                            //Pedimos el método de pago del alumno
-                            System.out.print("¿Cómo va a pagar el curso?\n\t1- A plazos\n\t2- Completo\nTu respuesta: ");
+                        //Sólo continuamos con el proceso si no elegimos la opción de "Salir"
+                        if(respuesta2 != longitud){
+                            //Igual que con los profesores, vamos a dar la opción de introducir automáticamente datos de los alumnos
+                            System.out.print("¿Quieres introducir los datos del alumno manualmente?\n\t1- Sí\n\t2- No\nTu respuesta: ");
                             respuesta = seleccionarOpcionInt(1, 2);
-                            plazos = (respuesta == 1)? true : false;
-                        } else { //Vamos a generar un alumno automáticamente
-                            //Generamos un nombre aleatorio usando los arrays de nombres que hemos definido al principio
-                            nAlumno = nombres[(int)(Math.random()*19)] + " " + apellidos[(int)(Math.random()*19)] + 
-                                               " " + apellidos[(int)(Math.random()*19)];
                             
-                            //Generamos un DNI aleatorio
-                            dniAlumno = generaDNI();
+                            //Defino variables que voy a usar en ambos casos
+                            String nAlumno, dniAlumno;
+                            boolean plazos;
                             
-                            //Ponemos un tipo de pago al azar
-                            plazos = (Math.random() < 0.5)? true : false;
+                            if(respuesta == 1){
+                                //Pedimos el nombre del alumno
+                                System.out.print("Nombre y apellidos del alumno: ");
+                                nAlumno = scan.nextLine();
+    
+                                //Pedimos el dni del alumno
+                                System.out.print("DNI de " + nAlumno + ": ");
+                                dniAlumno = scan.nextLine();
+                                
+                                //Pedimos el método de pago del alumno
+                                System.out.print("¿Cómo va a pagar el curso?\n\t1- A plazos\n\t2- Completo\nTu respuesta: ");
+                                respuesta = seleccionarOpcionInt(1, 2);
+                                plazos = (respuesta == 1)? true : false;
+
+                                //Una vez lo tenemos todo, creamos y asignamos el alumno al curso elegido
+                                cursos[respuesta2-1].insertaAlumno(new Alumno(dniAlumno, nAlumno, plazos));
+                            } else { //Vamos a generar un alumno automáticamente (o varios)
+                                System.out.print("¿Quieres llenar el curso automáticamente?\n\t1- Sí\n\t2- No\nTu respuesta: ");
+                                boolean auto = (seleccionarOpcionInt(1, 2) == 1)? true : false;
+
+                                int veces = (auto)? 30 - cursos[respuesta2-1].getNumAlumnos() : 1;
+
+                                for(int i=0; i<veces; i++){
+                                    //Generamos un nombre aleatorio usando los arrays de nombres que hemos definido al principio
+                                    nAlumno = nombres[(int)(Math.random()*19)] + " " + apellidos[(int)(Math.random()*19)] + 
+                                    " " + apellidos[(int)(Math.random()*19)];
+                
+                                    //Generamos un DNI aleatorio
+                                    dniAlumno = generaDNI();
+                                    
+                                    //Ponemos un tipo de pago al azar
+                                    plazos = (Math.random() < 0.5)? true : false;
+
+                                    //Una vez lo tenemos todo, creamos y asignamos el alumno al curso elegido
+                                    cursos[respuesta2-1].insertaAlumno(new Alumno(dniAlumno, nAlumno, plazos));
+                                }
+                                //Un sout para dar aviso de la operación
+                                System.out.println("Se ha(n) matriculado " + veces + " alumno(s) en " + cursos[respuesta2-1]);
+                            }
                         }
-
-                        System.out.print("");
-                        //
-
-
-
-
-
-
-
-
-
-
-
-                        
-                        //Construimos el alumno y lo introducimos en el array dentro del curso
-                        //profesores[Profesor.getNumProf()] = new Profesor(dniProfesor, nProfesor, sProfesor);
                     }
                 break;
+
                 case 7: //Mostrar toda la información de la escuela
                     System.out.println("CURSOS:");
-                    for(int i=0; i<Curso.getNumCursos(); i++){
-                        System.out.println("\t" + (i+1) + "- " + cursos[i]);
-                        if(cursos[i].getNumAsignaturas() != 0){
-                            System.out.print("\tASIGNATURAS:\n");
-                            imprimirLista(cursos[i].getAsignaturas());
-                        }
-                        if(cursos[i].getNumAlumnos() != 0){
-                            System.out.print("\tALUMNOS:");
-                            imprimirLista(cursos[i].getAlumnos());
+                    longitud = Curso.getNumCursos();
+                    if(longitud == 0) System.out.println("\tNo se ha registrado ningún curso por ahora.");
+                    else{
+                        for(int i=0; i<Curso.getNumCursos(); i++){
+                            System.out.println("\t" + (i+1) + "- " + cursos[i]);
+                            if(cursos[i].getNumAsignaturas() != 0){
+                                System.out.print("\t\tASIGNATURAS:\n");
+                                imprimirLista(cursos[i].getAsignaturas(), 3);
+                            }
+                            if(cursos[i].getNumAlumnos() != 0){
+                                System.out.print("\t\tALUMNOS:\n");
+                                imprimirLista(cursos[i].getAlumnos(), 3);
+                            }
                         }
                     }
-                    System.out.println("ASIGNATURAS:");
-                    for(int i=0; i<Asignatura.getNumAsig(); i++){
-                        System.out.println("\t" + (i+1) + "- " + asignaturas[i]);
+
+                    longitud = Asignatura.getNumAsig();
+                    System.out.println("\nASIGNATURAS:");
+                    if(longitud == 0) System.out.println("\tNo se ha registrado ninguna asignatura por ahora.");
+                    else imprimirLista(asignaturas, 1);
+
+                    longitud = Profesor.getNumProf();
+                    System.out.println("\nPROFESORES:");
+                    if(longitud == 0) System.out.println("\tNo se ha registrado ningún profesor por ahora.");
+                    else imprimirLista(profesores, 1);
+                break;
+                case 8: //Calcular el márgen de ganancia bruto de la escuela
+                    longitud = Curso.getNumCursos();
+                    if(longitud == 0) System.out.println("Todavía no se ha definido ningún curso.");
+                    else{
+                        System.out.print("Elige el mes hasta el que quieres calcular el márgen de ganancia de la escuela:\n");
+                        imprimirLista(meses, 1);
+                        System.out.print("Tu respuesta: ");
+                        respuesta = seleccionarOpcionInt(1, 12);
+
+                        int numPlazos, numCompletos, ganancia = 0;
+                        for(int i=0; i<longitud; i++){
+                            if(cursos[i].getNumAlumnos() >= 10){
+                                numPlazos = 0;
+                                numCompletos = 0;
+                                for(int j=0; j<cursos[i].getNumAlumnos(); j++){
+                                    if(cursos[i].getAlumnos()[j].getPlazos() == true) numPlazos++;
+                                    else numCompletos++;
+                                }
+                                for(int j=0; j<cursos[i].getNumAsignaturas(); j++){
+                                    if(cursos[i].getAsignaturas()[j].getProfesor() != null) 
+                                        ganancia -= cursos[i].getAsignaturas()[j].getHoras() * cursos[i].getAsignaturas()[j].getProfesor().getSueldoHora() * 4 * respuesta;
+                                }
+                                ganancia += (numPlazos*respuesta*cursos[i].getPrecio()/12) + numCompletos*cursos[i].getPrecio();
+                                System.out.println("En " + cursos[i].getNombre() + " hay " + numPlazos + " pagos en plazos, y " + numCompletos + " completos");
+                            }
+                        }
+                        System.out.println("Los ingresos de la escuela son de " + ganancia + "€");
                     }
                 break;
-                case 8: //Salir
-                    respuesta = -1;
-                break;
+
                 case 9: //Salir
                     respuesta = -1;
                 break;
@@ -322,10 +338,12 @@ public class GestionEscuela {
         } while(respuesta != -1);
     }
     
-    public static void imprimirLista(Object[] lista){
+    public static void imprimirLista(Object[] lista, int num){
         for (int i = 0; i < lista.length; i++) {
-            if(lista[i] != null) System.out.println("\t" + (i+1) + "- " + lista[i]);
-            else break;            
+            if(lista[i] != null){
+                for(int j=0; j<num; j++) System.out.print("\t");
+                System.out.println((i+1) + "- " + lista[i]);
+            } else break;            
         }
     }
     
@@ -338,7 +356,6 @@ public class GestionEscuela {
             System.out.print("El valor introducido no es válido. Por favor, introduce otro: ");
             respuesta = scan.nextFloat();
         }
-        
         return respuesta;
     }
     
